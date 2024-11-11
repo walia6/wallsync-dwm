@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Check if $XDG_CONFIG_HOME is set. If so, set config_dir to $XDG_CONFIG_HOME, else set it to $HOME/.config
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# Check if config_dir/wallsync-dwm/config.conf exists; if not, error out
+if [ ! -f "$config_dir/wallsync-dwm/config.conf" ]; then
+    echo "$config_dir/wallsync-dwm/config.conf not found"
+    exit 1
+fi
+
+# Set wallpaper_dir to the value of wallpaper_dir in config.conf
+wallpaper_dir=$(grep wallpaper_dir "$config_dir/wallsync-dwm/config.conf" | cut -d'=' -f2)
+
+# Replace ~ with $HOME in wallpaper_dir
+wallpaper_dir="${wallpaper_dir/#\~/$HOME}"
+
+# If wallpaper_dir is empty, error out
+if [ -z "$wallpaper_dir" ]; then
+    echo "wallpaper_dir not set in $config_dir/wallsync-dwm/config.conf"
+    exit 1
+fi
+
+# Check if $XDG_RUNTIME_DIR is set. If so, set tmp_dir to $XDG_RUNTIME_DIR, else set it to /run/user/$(id -u)
+tmp_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/wallsync-dwm"
+
+# If tmp_dir does not exist, mkdir -p it with mode 700
+if [ ! -d "$tmp_dir" ]; then
+    mkdir -p -m 700 "$tmp_dir"
+fi
+
+current_wallpaper_file="$tmp_dir/current_wallpaper"
+
+# Select a random wallpaper from wallpaper_dir
+current_wallpaper="$wallpaper_dir/$(ls "$wallpaper_dir" | shuf -n 1)"
+
+# Write the selected wallpaper to the current wallpaper file
+echo "$current_wallpaper" > "$current_wallpaper_file"

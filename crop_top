@@ -1,0 +1,33 @@
+#!/bin/bash
+
+input_image=$1
+output_image=$2
+
+# Check if the input image exists
+if [[ ! -f "$input_image" ]]; then
+  echo "Error: Input image '$input_image' not found."
+  exit 1
+fi
+
+# Get the image width and height
+width=$(vipsheader -f width "$input_image")
+height=$(vipsheader -f height "$input_image")
+
+# Verify that width and height were retrieved correctly
+if [[ -z "$width" || -z "$height" || "$width" -eq 0 || "$height" -eq 0 ]]; then
+  echo "Error: Failed to retrieve image dimensions."
+  exit 1
+fi
+
+# Calculate 4.07% of the height and round down to the nearest integer
+crop_height=$(echo "$height * 0.0407" | bc | awk '{print int($1+0.5)}')
+
+# Ensure crop_height is greater than 0
+if [[ "$crop_height" -le 0 ]]; then
+  echo "Error: Calculated crop height is zero or negative, which is invalid."
+  exit 1
+fi
+
+# Use vips to crop the top 4.07% of the image
+vips crop "$input_image" "$output_image" 0 0 "$width" "$crop_height"
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Check if $XDG_CONFIG_HOME is set. If so, set config_dir to $XDG_CONFIG_HOME, else set it to $HOME/.config
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# Check if config_dir/wallsync-dwm/config.conf exists; if not, error out
+if [ ! -f "$config_dir/wallsync-dwm/config.conf" ]; then
+    echo "$config_dir/wallsync-dwm/config.conf not found"
+    exit 1
+fi
+
+# set interval to value of interval in config.conf
+interval=$(grep interval "$config_dir/wallsync-dwm/config.conf" | cut -d'=' -f2)
+
+while true; do
+	sleep $interval &
+	~/.descripts/set_random_wallpaper_and_theme
+	wait
+done

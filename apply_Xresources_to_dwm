@@ -1,0 +1,15 @@
+#!/bin/bash
+#get xresources_file from config, which is at $XDG_CONFIG_HOME/wallsync-dwm/config.conf, if $XDG_CONFIG_HOME is not set, use $HOME/.config/wallsync-dwm/config.conf
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+config_file="$config_dir/wallsync-dwm/config.conf"
+if [ ! -f "$config_file" ]; then
+    echo "$config_file not found"
+    exit 1
+fi
+xresources_file="$(grep xresources_file "$config_file" | cut -d'=' -f2)"
+xresources_file="${xresources_file/#\~/$HOME}"
+xresources_file="${xresources_file:-"$HOME/.Xresources"}"
+
+#apply the Xresources file to dwm
+xrdb -merge "$xresources_file"
+dwmc xrdb
