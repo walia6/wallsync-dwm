@@ -14,6 +14,6 @@ interval=$(grep interval "$config_dir/wallsync-dwm/config.conf" | cut -d'=' -f2)
 
 while true; do
 	sleep $interval &
-	~/.descripts/set_random_wallpaper_and_theme
+	set_random_wallpaper_and_theme
 	wait
 done
